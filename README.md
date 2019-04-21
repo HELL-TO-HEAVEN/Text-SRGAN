@@ -9,10 +9,10 @@ After installing the prerequisite libraries, run the code with
 
 <b>Arguments:</b>
 
---mode=evaluate : Evaluate on single image
+``--mode=evaluate`` : Evaluate on single image
 
---mode=evaluateall : Evaluate all images
+``--mode=evaluateall`` : Evaluate all images
 
---ocr=true : Enable OCR
+``--ocr=true`` : Enable OCR
 
---ocr=false : Run without OCR
+``--ocr=false`` : Run without OCR
