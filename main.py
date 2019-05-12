@@ -133,7 +133,7 @@ def train():
     d_loss = d_loss1 + d_loss2
 
     #g_gan_loss = 1e-3 * tl.cost.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake), name='g')
-    g_gan_loss = 1e-3 * tl.cost.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake), name='g')
+    g_gan_loss = 1e-2 * tl.cost.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake), name='g')
     mse_loss = tl.cost.mean_squared_error(net_g.outputs, t_target_image, is_mean=True)
     vgg_loss = 2e-3 * tl.cost.mean_squared_error(vgg_predict_emb.outputs, vgg_target_emb.outputs, is_mean=True)
     #EPSILON = 1e-6
@@ -200,7 +200,6 @@ def train():
         #logfile.write("running epoch"+str(epoch)+"\n")
         epoch_time = time.time()
         total_mse_loss, n_iter = 0, 0
-
         ## If your machine cannot load all images into memory, you should use
         ## this one to load batch of images while training.
         # random.shuffle(train_hr_img_list)
@@ -226,7 +225,8 @@ def train():
         log = "[*] Epoch: [%2d/%2d] time: %4.4fs, mse: %.8f" % (epoch, n_epoch_init, time.time() - epoch_time, total_mse_loss / n_iter)
         print(log)
         logfile.write(log+'\n')
-        
+        logfile.flush()
+        os.fsync(logfile.fileno())
         ## quick evaluation on train set
         #if (epoch != 0) and (epoch % 10 == 0):
         #out = sess.run(net_g_test.outputs, {t_image: sample_imgs_96})  #; print('gen sub-image:', out.shape, out.min(), out.max())
@@ -237,7 +237,9 @@ def train():
         #if (epoch != 0) and (epoch % 10 == 0):
         tl.files.save_npz(net_g.all_params, name=checkpoint_dir + '/g_{}_init.npz'.format(tl.global_flag['mode']), sess=sess)
         #print("G init model saved")
-        logfile.write("G init model saved\n")
+        logfile.write("G init model saved")
+        logfile.flush()
+        os.fsync(logfile.fileno())
     ###========================= train GAN (SRGAN) =========================###
     print("\n\nStarted adversarial learning\n\n")
     for epoch in range(0, n_epoch + 1):
@@ -253,7 +255,8 @@ def train():
             print(log)
         
         logfile.write(log+'\n')
-        
+        logfile.flush()
+        os.fsync(logfile.fileno())
         epoch_time = time.time()
         total_d_loss, total_g_loss, n_iter = 0, 0, 0
         
@@ -289,6 +292,8 @@ def train():
                                                                                 total_g_loss / n_iter)
         print(log)
         logfile.write(log+'\n')
+        logfile.flush()
+        os.fsync(logfile.fileno())
         #
         #logfile.write("Completed")
         #logfile.close()
@@ -303,9 +308,11 @@ def train():
         
         tl.files.save_npz(net_g.all_params, name=checkpoint_dir + '/g_{}.npz'.format(tl.global_flag['mode']), sess=sess)
         tl.files.save_npz(net_d.all_params, name=checkpoint_dir + '/d_{}.npz'.format(tl.global_flag['mode']), sess=sess)
-        if(epoch%25==0):
-            conceval(epoch, net_g_test, t_image, sess)
+        #if(epoch%25==0):
+        #    conceval(epoch, net_g_test, t_image, sess)
         logfile.write("G and D models saved")
+        logfile.flush()
+        os.fsync(logfile.fileno())
     logfile.write("Completed")
     logfile.close()
 
